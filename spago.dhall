@@ -31,4 +31,8 @@ to generate this file without the comments in this block.
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
+, repo =
+    "https://github.com/ashutoshdas96/purescript-behaviors.git"
+, version =
+    "compiler/0.14/min"
 }
