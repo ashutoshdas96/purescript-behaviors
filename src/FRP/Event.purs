@@ -12,17 +12,15 @@ import Prelude
 import Control.Alternative (class Alt, class Alternative, class Plus)
 import Control.Apply (lift2)
 import Data.Array (deleteBy)
+import Data.Compactable (class Compactable, separateDefault)
 import Data.Either (either, fromLeft, fromRight, hush, isLeft, isRight)
-import Data.Compactable (class Compactable)
 import Data.Filterable (class Filterable, filterMap)
 import Data.Foldable (sequence_, traverse_)
 import Data.Maybe (Maybe(..), fromJust, isJust)
 import Effect (Effect)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
-import FRP.Event.Class (class Filterable, class IsEvent, count, filterMap, fix,
-                        fold, folded, gate, gateBy, keepLatest, mapAccum,
-                        sampleOn, sampleOn_, withLast) as Class
+import FRP.Event.Class (class Filterable, class IsEvent, count, filterMap, fix, fold, folded, gate, gateBy, keepLatest, mapAccum, sampleOn, sampleOn_, withLast) as Class
 import Partial.Unsafe (unsafePartial)
 import Unsafe.Reference (unsafeRefEq)
 
@@ -44,10 +42,10 @@ instance functorEvent :: Functor Event where
 
 instance compactableEvent :: Compactable Event where
   compact xs = map (\x -> unsafePartial fromJust x) (filter isJust xs)
-  separate xs =
-    { left: unsafePartial (map fromLeft) (filter isLeft xs)
-    , right: unsafePartial (map fromRight) (filter isRight xs)
-    }
+  separate xs = separateDefault xs
+    {-- { left: unsafePartial (map fromLeft) (filter isLeft xs) --}
+    {-- , right: unsafePartial (map fromRight) (filter isRight xs) --}
+    {-- } --}
 
 instance filterableEvent :: Filterable Event where
   filter = filter
