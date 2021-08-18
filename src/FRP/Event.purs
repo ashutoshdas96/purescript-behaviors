@@ -17,14 +17,12 @@ import Data.Compactable (class Compactable)
 import Data.Filterable (class Filterable, filterMap)
 import Data.Foldable (sequence_, traverse_)
 import Data.Maybe (Maybe(..), fromJust, isJust)
-import Data.Monoid (class Monoid)
 import Effect (Effect)
 import Effect.Ref as Ref
 import Effect.Unsafe (unsafePerformEffect)
-import FRP.Event.Class (class Filterable, class IsEvent, count, filterMap, fix, fold, folded, sampleOn, sampleOn_) as Class
-{-- import FRP.Event.Class (class Filterable, class IsEvent, count, filterMap, fix, --}
-{--                         fold, folded, gate, gateBy, keepLatest, mapAccum, --}
-{--                         sampleOn, sampleOn_, withLast) as Class --}
+import FRP.Event.Class (class Filterable, class IsEvent, count, filterMap, fix,
+                        fold, folded, gate, gateBy, keepLatest, mapAccum,
+                        sampleOn, sampleOn_, withLast) as Class
 import Partial.Unsafe (unsafePartial)
 import Unsafe.Reference (unsafeRefEq)
 
@@ -44,24 +42,24 @@ newtype Event a = Event ((a -> Effect Unit) -> Effect (Effect Unit))
 instance functorEvent :: Functor Event where
   map f (Event e) = Event \k -> e (k <<< f)
 
-{-- instance compactableEvent :: Compactable Event where --}
-{--   compact xs = map (\x -> unsafePartial fromJust x) (filter isJust xs) --}
-{--   separate xs = --}
-{--     { left: unsafePartial $ fromLeft <$> (filter isLeft xs) --}
-{--     , right: unsafePartial $ fromRight <$> (filter isRight xs) --}
-{--     } --}
+instance compactableEvent :: Compactable Event where
+  compact xs = map (\x -> unsafePartial fromJust x) (filter isJust xs)
+  separate xs =
+    { left: unsafePartial (map fromLeft) (filter isLeft xs)
+    , right: unsafePartial (map fromRight) (filter isRight xs)
+    }
 
-{-- instance filterableEvent :: Filterable Event where --}
-{--   filter = filter --}
+instance filterableEvent :: Filterable Event where
+  filter = filter
 
-{--   filterMap f = map (\x -> unsafePartial fromJust x) <<< filter isJust <<< map f --}
+  filterMap f = map (\x -> unsafePartial fromJust x) <<< filter isJust <<< map f
 
-{--   partition p xs = { yes: filter p xs, no: filter (not <<< p) xs } --}
+  partition p xs = { yes: filter p xs, no: filter (not <<< p) xs }
 
-{--   partitionMap f xs = --}
-{--     { left: filterMap (either Just (const Nothing) <<< f) xs --}
-{--     , right: filterMap (hush <<< f) xs --}
-{--     } --}
+  partitionMap f xs =
+    { left: filterMap (either Just (const Nothing) <<< f) xs
+    , right: filterMap (hush <<< f) xs
+    }
 
 instance applyEvent :: Apply Event where
   apply (Event e1) (Event e2) = Event \k -> do
